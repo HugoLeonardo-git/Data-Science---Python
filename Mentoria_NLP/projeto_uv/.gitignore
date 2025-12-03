@@ -4,4 +4,4 @@ _pycache_/
 .vscode/
 .venv/
 *.env
-
+*.mp3
