@@ -3,5 +3,6 @@ data/
 _pycache_/
 .vscode/
 .venv/
+docs/
 *.env
 *.mp3
