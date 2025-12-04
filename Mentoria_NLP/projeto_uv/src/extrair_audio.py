@@ -1,4 +1,23 @@
-def transcrever_youtube_yt_dlp(url, modelo="small", nome_arquivo="transcricao_youtube.txt"):
+import os
+import yt_dlp
+import whisper
+from pydub import AudioSegment
+from tqdm import tqdm
+import tempfile
+import time
+
+def transcrever_youtube_yt_dlp(url:str, modelo:str="small", nome_arquivo:str="transcricao_youtube.txt") -> str:
+    """
+    Faz download do áudio de um vídeo do YouTube e transcreve com Whisper.
+    
+    Parâmetros:
+        url (str): URL do vídeo no YouTube
+        modelo (str): modelo Whisper ('tiny', 'base', 'small', 'medium', 'large')
+        nome_arquivo (str): nome do arquivo de saída da transcrição
+
+    Retorna:
+        str: texto transcrevido
+    """
     # Passo 1: Baixar áudio com yt-dlp
     print("⏳ Baixando áudio com yt-dlp...")
     audio_path = "data/audio_temp.mp3"
@@ -33,13 +52,7 @@ def transcrever_youtube_yt_dlp(url, modelo="small", nome_arquivo="transcricao_yo
 
     return texto
 
-import os
-import yt_dlp
-import whisper
-from pydub import AudioSegment
-from tqdm import tqdm
-import tempfile
-import time
+
 
 def transcrever_youtube_yt_dlp_quebrado(url, modelo="small", chunk_min=30, nome_arquivo="transcricao.txt"):
     """
