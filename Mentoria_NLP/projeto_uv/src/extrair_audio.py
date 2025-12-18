@@ -6,6 +6,52 @@ from tqdm import tqdm
 import tempfile
 import time
 
+def baixar_audio_youtube(url: str, output_path: str = "data/audio_temp.mp3", quiet: bool = True) -> str:
+    """
+    Baixa o áudio de um vídeo do YouTube.
+    """
+    print("⏳ Baixando áudio com yt-dlp...")
+    # Garantir que o diretório existe
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': output_path,
+        'quiet': quiet,
+        'no_warnings': True,
+        'noplaylist': True,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+    print(f"✅ Áudio baixado em: {output_path}")
+    return output_path
+
+def transcrever_arquivo(audio_path: str, modelo: str = "small") -> dict:
+    """
+    Transcreve um arquivo de áudio local usando Whisper.
+    Retorna um dicionário com o texto e métricas de tempo.
+    """
+    # Passo 2: Carregar modelo Whisper
+    print(f"⏳ Carregando modelo Whisper ({modelo})...")
+    start_load = time.time()
+    model = whisper.load_model(modelo)
+    load_time = time.time() - start_load
+
+    # Passo 3: Transcrever áudio
+    print("⏳ Transcrevendo áudio...")
+    start_transcribe = time.time()
+    result = model.transcribe(audio_path, language="pt")
+    transcribe_time = time.time() - start_transcribe
+    
+    texto = result["text"]
+    print("✅ Transcrição concluída.")
+    
+    return {
+        "text": texto,
+        "load_time": load_time,
+        "transcribe_time": transcribe_time
+    }
+
 def transcrever_youtube_yt_dlp(url:str, modelo:str="small", nome_arquivo:str="transcricao_youtube.txt") -> str:
     """
     Faz download do áudio de um vídeo do YouTube e transcreve com Whisper.
@@ -18,37 +64,23 @@ def transcrever_youtube_yt_dlp(url:str, modelo:str="small", nome_arquivo:str="tr
     Retorna:
         str: texto transcrevido
     """
-    # Passo 1: Baixar áudio com yt-dlp
-    print("⏳ Baixando áudio com yt-dlp...")
     audio_path = "data/audio_temp.mp3"
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': audio_path,
-        'quiet': True,
-        'no_warnings': True,
-        'noplaylist': True,
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
-    print(f"✅ Áudio baixado em: {audio_path}")
+    
+    try:
+        baixar_audio_youtube(url, audio_path)
+        
+        resultado = transcrever_arquivo(audio_path, modelo)
+        texto = resultado["text"]
 
-    # Passo 2: Carregar modelo Whisper
-    print(f"⏳ Carregando modelo Whisper ({modelo})...")
-    model = whisper.load_model(modelo)
+        # Passo 4: Salvar transcrição
+        with open(nome_arquivo, "w", encoding="utf-8") as f:
+            f.write(texto)
+        print(f"✅ Transcrição salva em: {nome_arquivo}")
 
-    # Passo 3: Transcrever áudio
-    print("⏳ Transcrevendo áudio...")
-    result = model.transcribe(audio_path, language="pt")
-    texto = result["text"]
-    print("✅ Transcrição concluída.")
-
-    # Passo 4: Salvar transcrição
-    with open(nome_arquivo, "w", encoding="utf-8") as f:
-        f.write(texto)
-    print(f"✅ Transcrição salva em: {nome_arquivo}")
-
-    # Remover arquivo temporário
-    os.remove(audio_path)
+    finally:
+        # Remover arquivo temporário
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
 
     return texto
 
