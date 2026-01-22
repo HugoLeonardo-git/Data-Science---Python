@@ -30,6 +30,14 @@ def transcrever_arquivo(audio_path: str, modelo: str = "small") -> dict:
     """
     Transcreve um arquivo de áudio local usando Whisper.
     Retorna um dicionário com o texto e métricas de tempo.
+
+    Parâmetros:
+        audio_path (str): caminho do arquivo de áudio
+        modelo (str): modelo Whisper ('tiny', 'base', 'small', 'medium', 'large')
+    
+    Retorna:
+        dict: dicionário com o texto transcrevido e métricas de tempo
+        
     """
     # Passo 2: Carregar modelo Whisper
     print(f"⏳ Carregando modelo Whisper ({modelo})...")
