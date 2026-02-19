@@ -45,7 +45,7 @@ def gerar_transcricao(state: EstadoReceita) -> EstadoReceita:
 
     texto = transcrever_audio_local(temp_path)
 
-    os.remove(temp_path)
+    #os.remove(temp_path)
 
     state.transcricao = texto
     return state
@@ -68,13 +68,14 @@ def gerar_receita(estado: EstadoReceita) -> EstadoReceita:
 
     prompt_usuario = render_prompt(
         "usuario.jinja2",
-        transcricao=transcricao
+        texto_transcricao=transcricao
     )
 
     # Chamada LLM
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         response_model=Receita,   # structured output automático
+        temperature=0,            # Garante determinismo
         messages=[
             {"role": "system", "content": prompt_sistema},
             {"role": "user", "content": prompt_usuario},
