@@ -1,8 +1,11 @@
 ffmpeg-2025-10-21-git-535d4047d3-full_build/
 data/
-_pycache_/
+__pycache__/
+*.pyc
 .vscode/
 .venv/
 docs/
 *.env
 *.mp3
+Notebooks/
+debug_chunking.py
